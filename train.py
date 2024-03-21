@@ -3,11 +3,16 @@ import numpy as np
 import argparse
 import time
 import util
+import wandb
 import matplotlib.pyplot as plt
 from engine import trainer
 
+wandb.login()
+wandb.init(project="GWN-TASKFLOW")
+wandb.run.log_code('./', include_fn=lambda path: path.endswith(".py") or path.endswith(".ipynb"))
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--device',type=str,default='cuda:3',help='')
+parser.add_argument('--device',type=str,default='cuda:0',help='')
 parser.add_argument('--data',type=str,default='data/METR-LA',help='data path')
 parser.add_argument('--adjdata',type=str,default='data/sensor_graph/adj_mx.pkl',help='adj data path')
 parser.add_argument('--adjtype',type=str,default='doubletransition',help='adj type')
@@ -23,15 +28,14 @@ parser.add_argument('--batch_size',type=int,default=64,help='batch size')
 parser.add_argument('--learning_rate',type=float,default=0.001,help='learning rate')
 parser.add_argument('--dropout',type=float,default=0.3,help='dropout rate')
 parser.add_argument('--weight_decay',type=float,default=0.0001,help='weight decay rate')
-parser.add_argument('--epochs',type=int,default=100,help='')
+parser.add_argument('--epochs',type=int,default=30,help='')
 parser.add_argument('--print_every',type=int,default=50,help='')
 #parser.add_argument('--seed',type=int,default=99,help='random seed')
 parser.add_argument('--save',type=str,default='./garage/metr',help='save path')
 parser.add_argument('--expid',type=int,default=1,help='experiment id')
 
 args = parser.parse_args()
-
-
+wandb.config.update(args)
 
 
 def main():
@@ -60,7 +64,7 @@ def main():
     engine = trainer(scaler, args.in_dim, args.seq_length, args.num_nodes, args.nhid, args.dropout,
                          args.learning_rate, args.weight_decay, device, supports, args.gcn_bool, args.addaptadj,
                          adjinit)
-
+    wandb.watch(engine.model)
 
     print("start training...",flush=True)
     his_loss =[]
@@ -119,8 +123,13 @@ def main():
         mvalid_rmse = np.mean(valid_rmse)
         his_loss.append(mvalid_loss)
 
-        log = 'Epoch: {:03d}, Train Loss: {:.4f}, Train MAPE: {:.4f}, Train RMSE: {:.4f}, Valid Loss: {:.4f}, Valid MAPE: {:.4f}, Valid RMSE: {:.4f}, Training Time: {:.4f}/epoch'
-        print(log.format(i, mtrain_loss, mtrain_mape, mtrain_rmse, mvalid_loss, mvalid_mape, mvalid_rmse, (t2 - t1)),flush=True)
+        log = ('Epoch: {:03d}, Train Loss: {:.4f}, Train MAPE: {:.4f}, Train RMSE: {:.4f}, Valid Loss: {:.4f}, '
+               'Valid MAPE: {:.4f}, Valid RMSE: {:.4f}, Training Time: {:.4f}/epoch')
+        print(log.format(i, mtrain_loss, mtrain_mape, mtrain_rmse,
+                         mvalid_loss, mvalid_mape, mvalid_rmse, (t2 - t1)), flush=True)
+        wandb.log({"Train Loss": mtrain_loss, "Train MAPE": mtrain_mape, "Train RMSE": mtrain_rmse,
+                   "Valid Loss": mvalid_loss, "Valid MAPE": mvalid_mape, "Valid RMSE": mvalid_rmse,
+                   "Training Time": (t2 - t1)})
         torch.save(engine.model.state_dict(), args.save+"_epoch_"+str(i)+"_"+str(round(mvalid_loss,2))+".pth")
     print("Average Training Time: {:.4f} secs/epoch".format(np.mean(train_time)))
     print("Average Inference Time: {:.4f} secs".format(np.mean(val_time)))
@@ -165,7 +174,6 @@ def main():
     log = 'On average over 12 horizons, Test MAE: {:.4f}, Test MAPE: {:.4f}, Test RMSE: {:.4f}'
     print(log.format(np.mean(amae),np.mean(amape),np.mean(armse)))
     torch.save(engine.model.state_dict(), args.save+"_exp"+str(args.expid)+"_best_"+str(round(his_loss[bestid],2))+".pth")
-
 
 
 if __name__ == "__main__":
