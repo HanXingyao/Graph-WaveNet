@@ -56,17 +56,31 @@ def generate_graph_seq2seq_io_data(
 def generate_train_val_test(args):
     seq_length_x, seq_length_y = args.seq_length_x, args.seq_length_y
     json_file_path = args.traffic_df_filename
+    interval_length = args.interval
     with open(json_file_path, 'r', encoding='utf-8') as file:
         huawei_data = json.load(file)
     huawei_dict = {}
-    for index in huawei_data:
-        # print('#' * 100)
+    temp_dict = {}
+    interval_step = 0
+    base_date = pd.Timestamp("2024-02-24 00:00:00")
+    for i, index in enumerate(huawei_data):
         timestep = list(huawei_data[index].keys())[0]
-        huawei_dict[timestep] = {}
         areas_data = huawei_data[index][timestep]
         for area in areas_data['start']:
             start_num, end_num = areas_data['start'][area], areas_data['end'][area]
-            huawei_dict[timestep][area] = [start_num, end_num]
+            if area not in temp_dict:
+                temp_dict[area] = [start_num, end_num]
+            else:
+                temp_dict[area][0] += start_num
+                temp_dict[area][1] += end_num
+        if (i + 1) % interval_length == 0:
+            huawei_dict[(base_date + pd.Timedelta(minutes=interval_step)).strftime("%Y-%m-%d %H:%M:%S")] = temp_dict
+            temp_dict = {}
+            interval_step += 1
+    if temp_dict:
+        interval_step += 1
+        huawei_dict[(base_date + pd.Timedelta(minutes=interval_step)).strftime("%Y-%m-%d %H:%M:%S")] = temp_dict
+            # huawei_dict[timestep][area] = [start_num, end_num]
         # print(huawei_dict[timestep])
     df = pd.DataFrame(huawei_dict).T
     df.index = pd.to_datetime(df.index)
@@ -116,7 +130,8 @@ def generate_train_val_test(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_dir", type=str, default="data/HUAWEI-TASK", help="Output directory.")
+    parser.add_argument("--interval", type=int, default=1, help="---",)
+    parser.add_argument("--output_dir", type=str, default="data/HUAWEI-TASK", help="Output directory.",)
     parser.add_argument("--traffic_df_filename", type=str, default="data/huawei-task-seq.json",
                         help="Raw traffic readings.",)
     parser.add_argument("--seq_length_x", type=int, default=12, help="Sequence Length.",)
