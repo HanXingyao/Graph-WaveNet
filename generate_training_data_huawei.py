@@ -57,13 +57,17 @@ def generate_train_val_test(args):
     seq_length_x, seq_length_y = args.seq_length_x, args.seq_length_y
     json_file_path = args.traffic_df_filename
     interval_length = args.interval
+
+    # 把 huawei_data 里的数据排到 huawei_dict
     with open(json_file_path, 'r', encoding='utf-8') as file:
         huawei_data = json.load(file)
     huawei_dict = {}
+
+    # 开始迭代循环，temp_dict 用来存储每个时间段的数据
     temp_dict = {}
-    interval_step = 0
-    base_date = pd.Timestamp("2024-02-24 00:00:00")
     for i, index in enumerate(huawei_data):
+        if i == 0:
+            continue
         timestep = list(huawei_data[index].keys())[0]
         areas_data = huawei_data[index][timestep]
         for area in areas_data['start']:
@@ -73,15 +77,10 @@ def generate_train_val_test(args):
             else:
                 temp_dict[area][0] += start_num
                 temp_dict[area][1] += end_num
-        if (i + 1) % interval_length == 0:
-            huawei_dict[(base_date + pd.Timedelta(minutes=interval_step)).strftime("%Y-%m-%d %H:%M:%S")] = temp_dict
+        if i % interval_length == 0:
+            huawei_dict[timestep] = temp_dict
             temp_dict = {}
-            interval_step += 1
-    if temp_dict:
-        interval_step += 1
-        huawei_dict[(base_date + pd.Timedelta(minutes=interval_step)).strftime("%Y-%m-%d %H:%M:%S")] = temp_dict
-            # huawei_dict[timestep][area] = [start_num, end_num]
-        # print(huawei_dict[timestep])
+
     df = pd.DataFrame(huawei_dict).T
     df.index = pd.to_datetime(df.index)
     # print(df)
@@ -130,7 +129,7 @@ def generate_train_val_test(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--interval", type=int, default=1, help="---",)
+    parser.add_argument("--interval", type=int, default=10, help="Interval Num.",)
     parser.add_argument("--output_dir", type=str, default="data/HUAWEI-TASK", help="Output directory.",)
     parser.add_argument("--traffic_df_filename", type=str, default="data/huawei-task-seq.json",
                         help="Raw traffic readings.",)
@@ -140,9 +139,11 @@ if __name__ == "__main__":
     parser.add_argument("--dow", action='store_true',)
 
     args = parser.parse_args()
+    args.output_dir = args.output_dir + "-{}".format(args.interval)
     if os.path.exists(args.output_dir):
         reply = str(input(f'{args.output_dir} exists. Do you want to overwrite it? (y/n)')).lower().strip()
-        if reply[0] != 'y': exit
+        if reply[0] != 'y':
+            exit()
     else:
         os.makedirs(args.output_dir)
     generate_train_val_test(args)
