@@ -6,3 +6,4 @@ wandb/
 garage/
 *.json
 pics/
+*.png
