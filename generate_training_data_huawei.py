@@ -129,9 +129,9 @@ def generate_train_val_test(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--interval", type=int, default=10, help="Interval Num.",)
-    parser.add_argument("--output_dir", type=str, default="data/HUAWEI-TASK", help="Output directory.",)
-    parser.add_argument("--traffic_df_filename", type=str, default="data/huawei-task-seq.json",
+    parser.add_argument("--interval", type=int, default=25, help="Interval Num.",)
+    parser.add_argument("--output_dir", type=str, default="data/HUAWEI-TG-TASK", help="Output directory.",)
+    parser.add_argument("--traffic_df_filename", type=str, default="data/TG_result.json",
                         help="Raw traffic readings.",)
     parser.add_argument("--seq_length_x", type=int, default=12, help="Sequence Length.",)
     parser.add_argument("--seq_length_y", type=int, default=12, help="Sequence Length.",)

@@ -72,6 +72,7 @@ for node_id in map_data:
     if area_id not in area_code2node_id_ls:
         area_code2node_id_ls[area_id] = []
     area_code2node_id_ls[area_id].append(node_id)
+print('area_code2node_id_ls:', len(area_code2node_id_ls), list(area_code2node_id_ls.keys()))
 print('no_areaCode_id_ls:', no_areaCode_id_ls)
 
 # -----------------------------------------------------------------
