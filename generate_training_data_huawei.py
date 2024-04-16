@@ -81,6 +81,11 @@ def generate_train_val_test(args):
             huawei_dict[timestep] = temp_dict
             temp_dict = {}
 
+    for timestep in huawei_dict:
+        for area in huawei_dict[timestep]:
+            if huawei_dict[timestep][area] != [0, 0]:
+                huawei_dict[timestep][area] = [1, 1]
+
     df = pd.DataFrame(huawei_dict).T
     df.index = pd.to_datetime(df.index)
     # print(df)

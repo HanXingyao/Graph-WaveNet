@@ -7,3 +7,6 @@ garage/
 *.json
 pics/
 *.png
+every*/
+fig/
+data/

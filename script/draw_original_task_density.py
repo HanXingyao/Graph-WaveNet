@@ -1,4 +1,4 @@
-import json
+import json, os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -7,8 +7,10 @@ import numpy as np
 if __name__ == '__main__':
 
     interval_length = 20
+    path = os.path.dirname(__file__)
+    file_path = os.path.join(path, '../data/TG_result.json')
 
-    with open('huawei-task-seq.json', 'r') as f:
+    with open(file_path, 'r') as f:
         huawei_data = json.load(f)
         huawei_dict = {}
 
@@ -65,4 +67,5 @@ if __name__ == '__main__':
         plt.title(title)
         plt.subplots_adjust(left=0.3, right=0.8, top=0.98, bottom=0.1)
         pic_name = 'huawei_task_density_' + str(interval_length) + '.png'
-        plt.savefig(pic_name)
+        plt.show()
+        # plt.savefig(pic_name)

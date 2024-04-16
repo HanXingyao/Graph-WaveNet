@@ -29,12 +29,12 @@ print('#' * 100)
 
 # --------------------------------------------------------------------------------------------
 
-sensor_ids, sensor_id_to_ind, adj_mx = util.load_pickle('data/sensor_graph/adj_mx.pkl')
-print(sensor_ids)
-print(sensor_id_to_ind)
-print(adj_mx.shape)
-# print(adj_mx)
-print('#' * 100)
+# sensor_ids, sensor_id_to_ind, adj_mx = util.load_pickle('data/sensor_graph/adj_mx.pkl')
+# print(sensor_ids)
+# print(sensor_id_to_ind)
+# print(adj_mx.shape)
+# # print(adj_mx)
+# print('#' * 100)
 
 # --------------------------------------------------------------------------------------------
 
