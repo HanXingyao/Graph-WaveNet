@@ -3,12 +3,16 @@ import numpy as np
 import argparse
 import time
 import util
-import wandb
 import matplotlib.pyplot as plt
 from engine import trainer
 
+import os, wandb
+
+os.environ["WANDB_API_KEY"] = 'KEY'
+os.environ["WANDB_MODE"] = "offline"
+
 wandb.login()
-wandb.init(project="GWN-TASKFLOW")
+wandb.init(project="GWN-TASKFLOW", name='only_start', entity="irmv-dispatch")
 wandb.run.log_code('./', include_fn=lambda path: path.endswith(".py") or path.endswith(".ipynb"))
 
 parser = argparse.ArgumentParser()
@@ -28,7 +32,7 @@ parser.add_argument('--batch_size',type=int,default=64,help='batch size')
 parser.add_argument('--learning_rate',type=float,default=0.001,help='learning rate')
 parser.add_argument('--dropout',type=float,default=0.3,help='dropout rate')
 parser.add_argument('--weight_decay',type=float,default=0.0001,help='weight decay rate')
-parser.add_argument('--epochs',type=int,default=30,help='')
+parser.add_argument('--epochs',type=int,default=100,help='')
 parser.add_argument('--print_every',type=int,default=50,help='')
 #parser.add_argument('--seed',type=int,default=99,help='random seed')
 parser.add_argument('--save',type=str,default='./garage/metr',help='save path')
@@ -173,7 +177,13 @@ def main():
 
     log = 'On average over 12 horizons, Test MAE: {:.4f}, Test MAPE: {:.4f}, Test RMSE: {:.4f}'
     print(log.format(np.mean(amae),np.mean(amape),np.mean(armse)))
-    torch.save(engine.model.state_dict(), args.save+"_exp"+str(args.expid)+"_best_"+str(round(his_loss[bestid],2))+".pth")
+    # torch.save(engine.model.state_dict(), args.save+ "_best_"+str(round(his_loss[bestid],2))+".pth")
+    if args.data[-2] == '-':
+        interval = args.data[-1]
+    else:
+        interval = args.data[-2:]
+    # torch.save(engine.model.state_dict(), 'pth_files/' + 'dichotomy_' + interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
+    torch.save(engine.model.state_dict(), 'pth_files/' + interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
 
 
 if __name__ == "__main__":

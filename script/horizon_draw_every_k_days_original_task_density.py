@@ -3,6 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from tqdm import trange
+
+def value_convert(value):
+    if value >= 1:
+        return 70
+    else:
+        return 0
 
 if __name__ == '__main__':
 
@@ -42,6 +49,7 @@ if __name__ == '__main__':
     # print(df)
     for column in df.columns:
         df[column] = df[column].apply(lambda x: x[0])
+        df[column] = df[column].apply(value_convert)
     
     # df.index = df.index.minute + df.index.hour * 60
     # df = df.T
@@ -58,7 +66,7 @@ if __name__ == '__main__':
     num_days = (max_date - min_date).days
     num_plots = num_days // every_k_days
 
-    for i in range(num_plots):
+    for i in trange(num_plots):
         start_date = min_date + pd.DateOffset(days=i*every_k_days)
         end_date = start_date + pd.DateOffset(days=every_k_days)
         # df_k_days = df[(df.index.date >= start_date) and (df.index.date < end_date)]
@@ -67,20 +75,22 @@ if __name__ == '__main__':
         df_k_days = df[(df.index >= start_date) & (df.index < end_date)]
         df_k_days.index = df_k_days.index.hour * 60 + df_k_days.index.minute
         df_k_days = df_k_days.T
+        print(df_k_days.shape)
 
         plt.figure()
         _, ax = plt.subplots(figsize=(40, 2))
-        sns.heatmap(df_k_days, cmap='YlGnBu', ax=ax, cbar=False, vmin=0, vmax=10)
+        sns.heatmap(df_k_days, cmap='YlGnBu', ax=ax, cbar=False, vmin=0, vmax=70)
         # plt.xlim(0, 575)
         # plt.xticks(np.arange(0, 575, 50), np.arange(0, 575, 50))
         # plt.yticks([i for i in range(0, 24)], [str(i + 1) for i in range(0, 24)])
         # plt.yticks(fontsize=4)
 
-        cbar = ax.figure.colorbar(ax.collections[0], ax=ax, orientation='vertical', pad=0.1)
-        cbar.ax.xaxis.set_ticks_position('top')
-        cbar.ax.xaxis.set_label_position('top')
+        # cbar = ax.figure.colorbar(ax.collections[0], ax=ax, orientation='vertical', pad=0.1)
+        # cbar.ax.xaxis.set_ticks_position('top')
+        # cbar.ax.xaxis.set_label_position('top')
 
         title = 'Huawei Task Density' + ' (every: ' + str(every_k_days) + ' days)'
+        plt.xticks([])
         plt.xlabel('Time (minutes)')
         plt.ylabel('Areas')
         plt.title(title)

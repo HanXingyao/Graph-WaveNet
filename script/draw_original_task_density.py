@@ -6,7 +6,7 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    interval_length = 20
+    interval_length = 1
     path = os.path.dirname(__file__)
     file_path = os.path.join(path, '../data/TG_result.json')
 
@@ -68,4 +68,4 @@ if __name__ == '__main__':
         plt.subplots_adjust(left=0.3, right=0.8, top=0.98, bottom=0.1)
         pic_name = 'huawei_task_density_' + str(interval_length) + '.png'
         plt.show()
-        # plt.savefig(pic_name)
+        plt.savefig(pic_name)

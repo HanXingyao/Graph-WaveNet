@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--device',type=str,default='cuda:3',help='')
+parser.add_argument('--device',type=str,default='cuda:0',help='')
 parser.add_argument('--data',type=str,default='data/METR-LA',help='data path')
 parser.add_argument('--adjdata',type=str,default='data/sensor_graph/adj_mx.pkl',help='adj data path')
 parser.add_argument('--adjtype',type=str,default='doubletransition',help='adj type')
@@ -45,7 +45,8 @@ def main():
     if args.aptonly:
         supports = None
 
-    model =  gwnet(device, args.num_nodes, args.dropout, supports=supports, gcn_bool=args.gcn_bool, addaptadj=args.addaptadj, aptinit=adjinit)
+    model =  gwnet(device, args.num_nodes, args.dropout, supports=supports, 
+                   gcn_bool=args.gcn_bool, addaptadj=args.addaptadj, aptinit=adjinit, in_dim=args.in_dim)
     model.to(device)
     model.load_state_dict(torch.load(args.checkpoint))
     model.eval()
@@ -97,13 +98,19 @@ def main():
         sns.heatmap(df, cmap="RdYlBu")
         plt.savefig("./emb"+ '.pdf')
 
-    y12 = realy[:,99,11].cpu().detach().numpy()
-    yhat12 = scaler.inverse_transform(yhat[:,99,11]).cpu().detach().numpy()
+    # y12 = realy[:,18,1].cpu().detach().numpy()
+    # yhat12 = scaler.inverse_transform(yhat[:,18,1]).cpu().detach().numpy()
 
-    y3 = realy[:,99,2].cpu().detach().numpy()
-    yhat3 = scaler.inverse_transform(yhat[:,99,2]).cpu().detach().numpy()
+    # y3 = realy[:,18,1].cpu().detach().numpy()
+    # yhat3 = scaler.inverse_transform(yhat[:,18,1]).cpu().detach().numpy()
+    result_dict = {}
+    for i in range(19):
+        y = realy[:,i,11].cpu().detach().numpy()
+        y_1 = scaler.inverse_transform(yhat[:,i,11]).cpu().detach().numpy()
+        result_dict['real' + str(i)] = y
+        result_dict['pred' + str(i)] = y_1
 
-    df2 = pd.DataFrame({'real12':y12,'pred12':yhat12, 'real3': y3, 'pred3':yhat3})
+    df2 = pd.DataFrame(result_dict)
     df2.to_csv('./wave.csv',index=False)
 
 

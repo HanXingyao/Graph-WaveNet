@@ -1,8 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('pred_result.csv')
+df = pd.read_csv('map-wave.csv')
 columns = df.columns
+print(columns)
 
 real_df = pd.DataFrame()
 pred_df = pd.DataFrame()
@@ -30,4 +31,4 @@ ax[-1, -1].axis('off')
 plt.subplots_adjust(wspace=0.5)
 
 # plt.show()
-plt.savefig('pred_result.png')
+plt.savefig('map-pred_result.png')
