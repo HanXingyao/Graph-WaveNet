@@ -61,6 +61,7 @@ def generate_train_val_test(args):
     seq_length_x, seq_length_y = args.seq_length_x, args.seq_length_y
     json_file_path = args.traffic_df_filename
     interval_length = args.interval
+    ratio = args.data_ratio
 
     # 把 huawei_data 里的数据排到 huawei_dict
     with open(json_file_path, 'r', encoding='utf-8') as file:
@@ -68,27 +69,28 @@ def generate_train_val_test(args):
     
     # ----------------------------------------------------------------------------
     # 若一个区域在某一帧不是零，那么将其前5帧和后5帧的数据都设置为1(考虑两端不能越界的情况)
-    # temp_huawei_data = copy.deepcopy(huawei_data)
-    # for i in range(len(huawei_data)):
-    #     index = str(i)
-    #     timestep = list(huawei_data[index].keys())[0]
-    #     areas_data = huawei_data[index][timestep]
-    #     for area in areas_data['start']:
-    #         start_num, _ = areas_data['start'][area], areas_data['end'][area]
-    #         if start_num != 0:
-    #             for j in range(1, 6):
-    #                 if i - j >= 0:
-    #                     timestep = list(huawei_data[str(i - j)].keys())[0]
-    #                     temp_huawei_data[str(i - j)][timestep]['start'][area] = 1
-    #                     # print("###########")
-    #                     # huawei_data[i - j][timestep]['end'][area] = 1
-    #             for j in range(1, 6):
-    #                 if i + j < len(huawei_data):
-    #                     timestep = list(huawei_data[str(i + j)].keys())[0]
-    #                     temp_huawei_data[str(i + j)][timestep]['start'][area] = 1
-                        # # print("###########")
-                        # # huawei_data[i + j][timestep]['end'][area] = 1
-    # huawei_data = temp_huawei_data
+    temp_huawei_data = copy.deepcopy(huawei_data)
+    # for i in range(int((1 - ratio) * len(huawei_data)), len(huawei_data)):
+    for i in range(len(huawei_data)):
+        index = str(i)
+        timestep = list(huawei_data[index].keys())[0]
+        areas_data = huawei_data[index][timestep]
+        for area in areas_data['start']:
+            start_num, _ = areas_data['start'][area], areas_data['end'][area]
+            if start_num != 0:
+                for j in range(1, 6):
+                    if i - j >= 0:
+                        timestep = list(huawei_data[str(i - j)].keys())[0]
+                        temp_huawei_data[str(i - j)][timestep]['start'][area] = 1
+                        # print("###########")
+                        # huawei_data[i - j][timestep]['end'][area] = 1
+                for j in range(1, 6):
+                    if i + j < len(huawei_data):
+                        timestep = list(huawei_data[str(i + j)].keys())[0]
+                        temp_huawei_data[str(i + j)][timestep]['start'][area] = 1
+                        # print("###########")
+                        # huawei_data[i + j][timestep]['end'][area] = 1
+    huawei_data = temp_huawei_data
     # ----------------------------------------------------------------------------
     huawei_dict = {}
     
@@ -104,16 +106,19 @@ def generate_train_val_test(args):
     #         count += 1
             # print(i, timestep, start_num)
     # print(count)
+
     # 开始迭代循环，temp_dict 用来存储每个时间段的数据
     temp_dict = {}
-    for i, index in enumerate(huawei_data):
+    # for i, index in enumerate(huawei_data):
+    for i in range(int((1 - ratio) * len(huawei_data)), len(huawei_data)):
+        index = str(i)
         if i == 0:
             continue
         timestep = list(huawei_data[index].keys())[0]
         # print(type(timestep))
         areas_data = huawei_data[index][timestep]
         for area in areas_data['start']:
-            start_num, end_num = areas_data['start'][area], areas_data['end'][area]
+            start_num, _ = areas_data['start'][area], areas_data['end'][area]
             if area not in temp_dict:
                 # temp_dict[area] = [start_num, end_num]
                 temp_dict[area] = [start_num]
@@ -122,11 +127,11 @@ def generate_train_val_test(args):
                 # temp_dict[area][1] += end_num
         if i % interval_length == 0:
             # 有无任务的映射
-            # for area in temp_dict:
-            #     if temp_dict[area][0] == 0:
-            #         temp_dict[area][0] = 20 + random.uniform(-8.0, 8.0)
-            #     else:
-            #         temp_dict[area][0] = 60 + random.uniform(-8.0, 8.0)
+            for area in temp_dict:
+                if temp_dict[area][0] == 0:
+                    temp_dict[area][0] = 20 + random.uniform(-8.0, 8.0)
+                else:
+                    temp_dict[area][0] = 60 + random.uniform(-8.0, 8.0)
 
             # for area in temp_dict:
             #     if temp_dict[area][0] != 0:
@@ -157,6 +162,7 @@ def generate_train_val_test(args):
     x_offsets = np.sort(np.concatenate((np.arange(-(seq_length_x - 1), 1, 1),)))
     # Predict the next one hour
     y_offsets = np.sort(np.arange(args.y_start, (seq_length_y + 1), 1))
+    print(x_offsets, y_offsets)
     # x: (num_samples, input_length, num_nodes, input_dim)
     # y: (num_samples, output_length, num_nodes, output_dim)
     print(df.shape)
@@ -196,6 +202,7 @@ def generate_train_val_test(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--interval", type=int, default=1, help="Interval Num.",)
+    parser.add_argument("--data_ratio", type=float, default=1, help="Data ratio backforwards, the number of days is 59.",)
     parser.add_argument("--output_dir", type=str, default="data/tg-task", help="Output directory.",)
     parser.add_argument("--traffic_df_filename", type=str, default="data/TG_result.json",
                         help="Raw traffic readings.",)
@@ -205,7 +212,8 @@ if __name__ == "__main__":
     parser.add_argument("--dow", action='store_true',)
 
     args = parser.parse_args()
-    args.output_dir = args.output_dir + "-{}".format(args.interval)
+    days = int(59 * args.data_ratio)
+    args.output_dir = args.output_dir + "-{}".format(args.interval) + f'-{days}'
     if os.path.exists(args.output_dir):
         reply = str(input(f'{args.output_dir} exists. Do you want to overwrite it? (y/n)')).lower().strip()
         if reply[0] != 'y':

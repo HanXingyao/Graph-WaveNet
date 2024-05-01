@@ -111,7 +111,11 @@ def main():
         result_dict['pred' + str(i)] = y_1
 
     df2 = pd.DataFrame(result_dict)
-    df2.to_csv('./wave.csv',index=False)
+    if args.data[-2] == '-':
+        days = args.data[-1]
+    else:
+        days = args.data[-2:]
+    df2.to_csv(f'./{days}-wave.csv',index=False)
 
 
 if __name__ == "__main__":

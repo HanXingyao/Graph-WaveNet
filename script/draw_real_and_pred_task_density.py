@@ -10,7 +10,7 @@ def convert_value(value):
     else:
         return 0
 
-df = pd.read_csv('exps/1模糊二分/map-wave.csv')
+df = pd.read_csv('exps/域迁移/7days/7-wave.csv')
 columns = df.columns
 
 real_df = pd.DataFrame()
@@ -78,7 +78,7 @@ def draw_combined_matrix(real_df, pred_df, title):
     axs[0].set_xticks(np.arange(0, real_df.shape[0], 50))
     axs[0].set_xticklabels(np.arange(0, real_df.shape[0], 50))
     axs[0].set_yticks(np.arange(0, real_df.shape[1]))
-    axs[0].set_yticklabels(np.arange(1, real_df.shape[1]+1))
+    axs[0].set_yticklabels(np.arange(0, real_df.shape[1]))
     axs[0].tick_params(axis='y', labelsize=7)
 
     # Second subplot for pred_df
@@ -90,7 +90,7 @@ def draw_combined_matrix(real_df, pred_df, title):
     axs[1].set_xticks(np.arange(0, pred_df.shape[0], 50))
     axs[1].set_xticklabels(np.arange(0, pred_df.shape[0], 50))
     axs[1].set_yticks(np.arange(0, pred_df.shape[1]))
-    axs[1].set_yticklabels(np.arange(1, pred_df.shape[1]+1))
+    axs[1].set_yticklabels(np.arange(0, pred_df.shape[1]))
     axs[1].tick_params(axis='y', labelsize=7)  # no need to set yticks or yticklabels, shared with axs[0]
 
     # Common colorbar
