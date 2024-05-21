@@ -4,7 +4,7 @@ import numpy as np
 import util
 
 
-json_file_path = 'data/TG_result.json'
+json_file_path = 'data/BB_result.json'
 with open(json_file_path, 'r', encoding='utf-8') as file:
     huawei_data = json.load(file)
 
@@ -23,7 +23,7 @@ print('Sensor ID dict:', sensor_id_to_ind)
 adj_mx = np.diag(np.ones(len(sensor_ids)))
 print('ADJ Matrix shape:', adj_mx.shape)
 
-with open('data/sensor_graph/adj_mx_TG_new.pkl', 'wb') as f:
+with open('data/sensor_graph/adj_BB.pkl', 'wb') as f:
     pickle.dump((sensor_ids, sensor_id_to_ind, adj_mx), f)
 print('#' * 100)
 
@@ -38,7 +38,7 @@ print('#' * 100)
 
 # --------------------------------------------------------------------------------------------
 
-sensor_ids, sensor_id_to_ind, adj_mx = util.load_pickle('data/sensor_graph/adj_mx_TG_new.pkl')
+sensor_ids, sensor_id_to_ind, adj_mx = util.load_pickle('data/sensor_graph/adj_BB.pkl')
 print(sensor_ids)
 print(sensor_id_to_ind)
 print(adj_mx.shape)

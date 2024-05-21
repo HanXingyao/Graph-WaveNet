@@ -3,7 +3,7 @@ from script_ultils import *
 
 if __name__ == '__main__':
     # ------------------------参数设置------------------------
-    csv_file_path = 'exps/域迁移/1模糊二分/map-wave.csv'
+    csv_file_path = 'exps/ja-8/ja-wave.csv'
     sample_threshold = 0.1 # 采样阈值, 0.1代表10%的概率进行反向采样
 
     calculate_mape_flag = False
@@ -19,10 +19,13 @@ if __name__ == '__main__':
     # 原始数据    
     interval_length = 1
     path = os.path.dirname(__file__)
-    json_path = os.path.join(path, '../TG_result.json')
+    json_path = os.path.join(path, '../data/JA_result.json')
     with open(json_path, 'r') as f:
         huawei_data = json.load(f)
-        real_index = ['real' + str(i) for i in range(0, 19)]
+        timestamp = list(huawei_data['0'].keys())[0]
+        area_num = len(huawei_data['0'][timestamp]['start'])
+        shape_y = len(huawei_data)
+        real_index = ['real' + str(i) for i in range(0, area_num)]
         data = [
             [areas_data['start'][area] for j, area in enumerate(areas_data['start'])]
             for i, index in enumerate(huawei_data) if i != 0
@@ -162,6 +165,6 @@ if __name__ == '__main__':
             print(v)
 # --------------------------------------------------------------------------------------------
     # flag =np.allclose(origin_real_df['real0'], pred_df['pred0'])
-    num_list = [0, 6, 9, 16]
-    flags = [origin_real_df[f'real{i}'].equals(pred_df[f'pred{i}']) for i in num_list]
-    print(flags)
+    # num_list = [0, 6, 9, 16]
+    # flags = [origin_real_df[f'real{i}'].equals(pred_df[f'pred{i}']) for i in num_list]
+    # print(flags)

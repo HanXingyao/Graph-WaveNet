@@ -17,7 +17,7 @@ wandb.run.log_code('./', include_fn=lambda path: path.endswith(".py") or path.en
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--device',type=str,default='cuda:0',help='')
-parser.add_argument('--data',type=str,default='data/HUAWEI-TASK',help='data path')
+parser.add_argument('--data',type=str,default='data/bb-task-1-5',help='data path')
 parser.add_argument('--adjdata',type=str,default='data/sensor_graph/adj_mx_TG.pkl',help='adj data path')
 parser.add_argument('--adjtype',type=str,default='doubletransition',help='adj type')
 parser.add_argument('--gcn_bool',action='store_true',help='whether to add graph convolution layer')
@@ -183,7 +183,8 @@ def main():
     else:
         interval = args.data[-2:]
     # torch.save(engine.model.state_dict(), 'pth_files/' + 'dichotomy_' + interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
-    torch.save(engine.model.state_dict(), 'pth_files/' + interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
+    map_name = args.data[5:].split('-')[0]
+    torch.save(engine.model.state_dict(), 'pth_files/' + f'{map_name}_' +interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
 
 
 if __name__ == "__main__":

@@ -203,8 +203,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--interval", type=int, default=1, help="Interval Num.",)
     parser.add_argument("--data_ratio", type=float, default=1, help="Data ratio backforwards, the number of days is 59.",)
-    parser.add_argument("--output_dir", type=str, default="data/tg-task", help="Output directory.",)
-    parser.add_argument("--traffic_df_filename", type=str, default="data/TG_result.json",
+    parser.add_argument("--output_dir", type=str, default="data/bb-task", help="Output directory.",)
+    parser.add_argument("--traffic_df_filename", type=str, default="data/BB_result.json",
                         help="Raw traffic readings.",)
     parser.add_argument("--seq_length_x", type=int, default=12, help="Sequence Length.",)
     parser.add_argument("--seq_length_y", type=int, default=12, help="Sequence Length.",)
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument("--dow", action='store_true',)
 
     args = parser.parse_args()
-    days = int(59 * args.data_ratio)
+    days = int(5 * args.data_ratio)
     args.output_dir = args.output_dir + "-{}".format(args.interval) + f'-{days}'
     if os.path.exists(args.output_dir):
         reply = str(input(f'{args.output_dir} exists. Do you want to overwrite it? (y/n)')).lower().strip()

@@ -104,7 +104,7 @@ def main():
     # y3 = realy[:,18,1].cpu().detach().numpy()
     # yhat3 = scaler.inverse_transform(yhat[:,18,1]).cpu().detach().numpy()
     result_dict = {}
-    for i in range(19):
+    for i in range(args.num_nodes):
         y = realy[:,i,11].cpu().detach().numpy()
         y_1 = scaler.inverse_transform(yhat[:,i,11]).cpu().detach().numpy()
         result_dict['real' + str(i)] = y
@@ -115,7 +115,8 @@ def main():
         days = args.data[-1]
     else:
         days = args.data[-2:]
-    df2.to_csv(f'./{days}-wave.csv',index=False)
+    map_name = args.data[5:].split('-')[0]
+    df2.to_csv(f'./{map_name}-wave.csv',index=False)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 ### train: 
-python train.py --gcn_bool --addaptadj --randomadj --data data/tg-task-1-11 --adjdata data/sensor_graph/adj_mx_TG_new.pkl --num_nodes 19 --in_dim 2
+python train.py --gcn_bool --addaptadj --randomadj --data data/bb-task-1-5 --adjdata data/sensor_graph/adj_BB.pkl --num_nodes 6 --in_dim 2
 
 ### wandb log to upload:
 1. (not dichotomy)wandb sync /home/imrs/CaoBo/Graph-WaveNet/wandb/offline-run-20240406_134108-jfqaee46
@@ -17,4 +17,4 @@ python train.py --gcn_bool --addaptadj --randomadj --data data/tg-task-1-11 --ad
 11. (interval=20) wandb sync /home/imrs/CaoBo/Graph-WaveNet/wandb/offline-run-20240423_125043-pom3f5ba
 
 ### test: 
-python test.py --gcn_bool --addaptadj --randomadj --data data/tg-task-1-7 --adjdata data/sensor_graph/adj_mx_TG_new.pkl --num_nodes 19 --in_dim 2 --checkpoint pth_files/7_best_7.33.pth
+python test.py --gcn_bool --addaptadj --randomadj --data data/bb-task-1-5 --adjdata data/sensor_graph/adj_BB.pkl --num_nodes 6 --in_dim 2 --checkpoint pth_files/bb_5_best_7.89.pth
