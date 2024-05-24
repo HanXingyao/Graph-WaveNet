@@ -10,7 +10,7 @@ def convert_value(value):
     else:
         return 0
 
-df = pd.read_csv('exps/域迁移/7days/7-wave.csv')
+df = pd.read_csv('csv_result/ja-wave.csv')
 columns = df.columns
 
 real_df = pd.DataFrame()
@@ -106,5 +106,5 @@ def draw_combined_matrix(real_df, pred_df, title):
 if __name__ == '__main__':
     # draw_matrix_2(real_df, 'Real Task Flow Data')
     # draw_matrix_2(pred_df, 'Predicted Task FlowData')
-    draw_combined_matrix(real_df, pred_df, 'Real vs Predicted Task Flow Data')
+    draw_combined_matrix(real_df, pred_df, '[JA]Real vs Predicted Task Flow Data')
 

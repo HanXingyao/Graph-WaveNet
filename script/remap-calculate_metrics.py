@@ -11,7 +11,7 @@ if __name__ == '__main__':
     calculate_accuracy_precision_recall_flag = False
 
     time_window_calculate_flag = True
-    len_time_window = 13 # 时间窗长度
+    len_time_window = 7 # 时间窗长度
 
     half_k = len_time_window // 2
 
@@ -138,7 +138,7 @@ if __name__ == '__main__':
         print("实际值中有任务的时间帧的个数:")
         for a in non_zero_counts_real.to_numpy():
             print(a)
-        print("预测值中无任务的时间帧的个数:")
+        print("预测值中有任务的时间帧的个数:")
         for a in non_zero_counts_pred.to_numpy():
             print(a)
         evaluation_scores = pd.Series(dtype=float)
@@ -168,3 +168,4 @@ if __name__ == '__main__':
     # num_list = [0, 6, 9, 16]
     # flags = [origin_real_df[f'real{i}'].equals(pred_df[f'pred{i}']) for i in num_list]
     # print(flags)
+    
