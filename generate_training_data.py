@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 import os
 import pandas as pd
-
+import math
 
 def generate_graph_seq2seq_io_data(
         df, x_offsets, y_offsets, add_time_in_day=True, add_day_in_week=False, scaler=None
@@ -90,10 +90,90 @@ def generate_train_val_test(args):
             y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
         )
 
+def generate_train_val_test(args):
+    seq_length_x, seq_length_y = args.seq_length_x, args.seq_length_y
+    data_dict = {}
+    area_num = 20
+    week_period = 24 * 60 * 7
+    day_period = week_period / 7
+    k = 5 # k个规律数据 非周期叠加
+
+    total_timestamps_num = week_period
+    start_time = pd.Timestamp('2024-01-01 00:00:00')
+
+    sine_params = {}
+    for area in range(1, area_num+1):
+        sine_params[area] = [{
+            'amplitude': np.random.randint(40, 80),
+            'frequency': np.random.uniform(0.1, 0.5),
+            'phase': np.random.randint(0, 2 * math.pi)
+        }
+            for _ in range(k)
+        ]
+
+    for i in range(total_timestamps_num * 4):
+        timestep = (start_time + pd.Timedelta(minutes=i)).strftime('%Y-%m-%d %H:%M:%S')
+        data_dict[timestep] = {}
+        for area in range(1, area_num+1): # 20 个区域
+            minute_of_day = i % day_period
+            base_cycle = 40 * math.sin(2 * area/10 * math.pi * minute_of_day / day_period + math.pi/10 * area) + 80
+            additional_cycles = 0
+            # minute_of_week = i % week_period
+            # weekly_cycle = 10 * math.cos(2 * math.pi * minute_of_week / week_period + math.pi/20 * area) + 20
+            for params in sine_params[area]:
+                additional_cycles += params['amplitude'] * math.sin(2 * math.pi * params['frequency'] * 
+                                                                    minute_of_day / day_period + params['phase'])
+
+            total_cycle = base_cycle + additional_cycles
+            data_value = total_cycle / k
+            data_dict[timestep][str(area)] = data_value
+            
+    df = pd.DataFrame(data_dict).T
+    df.index = pd.to_datetime(df.index)
+    
+    # 0 is the latest observed sample.
+    x_offsets = np.sort(np.concatenate((np.arange(-(seq_length_x - 1), 1, 1),)))
+    # Predict the next one hour
+    y_offsets = np.sort(np.arange(args.y_start, (seq_length_y + 1), 1))
+    print(x_offsets, y_offsets)
+    # x: (num_samples, input_length, num_nodes, input_dim)
+    # y: (num_samples, output_length, num_nodes, output_dim)
+    print(df.shape)
+    x, y = generate_graph_seq2seq_io_data(
+        df,
+        x_offsets=x_offsets,
+        y_offsets=y_offsets,
+        add_time_in_day=True,
+        add_day_in_week=args.dow,
+    )
+
+    print("x shape: ", x.shape, ", y shape: ", y.shape)
+    # Write the data into npz file.
+    num_samples = x.shape[0]
+    num_test = round(num_samples * 0.2)
+    num_train = round(num_samples * 0.7)
+    num_val = num_samples - num_test - num_train
+    x_train, y_train = x[:num_train], y[:num_train]
+    x_val, y_val = (
+        x[num_train: num_train + num_val],
+        y[num_train: num_train + num_val],
+    )
+    x_test, y_test = x[-num_test:], y[-num_test:]
+
+    for cat in ["train", "val", "test"]:
+        _x, _y = locals()["x_" + cat], locals()["y_" + cat]
+        print(cat, "x: ", _x.shape, "y:", _y.shape)
+        np.savez_compressed(
+            os.path.join(args.output_dir, f"{cat}.npz"),
+            x=_x,
+            y=_y,
+            x_offsets=x_offsets.reshape(list(x_offsets.shape) + [1]),
+            y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
+        )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_dir", type=str, default="data/METR-LA", help="Output directory.")
+    parser.add_argument("--output_dir", type=str, default="data/5_pure_sin_daily-30", help="Output directory.")
     parser.add_argument("--traffic_df_filename", type=str, default="data/metr-la.h5", help="Raw traffic readings.",)
     parser.add_argument("--seq_length_x", type=int, default=12, help="Sequence Length.",)
     parser.add_argument("--seq_length_y", type=int, default=12, help="Sequence Length.",)

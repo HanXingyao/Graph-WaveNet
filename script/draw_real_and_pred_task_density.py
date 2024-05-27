@@ -10,7 +10,7 @@ def convert_value(value):
     else:
         return 0
 
-df = pd.read_csv('csv_result/ja-wave.csv')
+df = pd.read_csv('csv_result/pure_sin_daily-wave.csv')
 columns = df.columns
 
 real_df = pd.DataFrame()
@@ -18,11 +18,11 @@ pred_df = pd.DataFrame()
 
 for column in columns:
     if 'real' in column:
-        real_df[column] = df[column].apply(convert_value)
-        # real_df[column] = df[column]
+        # real_df[column] = df[column].apply(convert_value)
+        real_df[column] = df[column]
     if 'pred' in column:
-        pred_df[column] = df[column].apply(convert_value)
-        # pred_df[column] = df[column]
+        # pred_df[column] = df[column].apply(convert_value)
+        pred_df[column] = df[column]
         
 # real_df = real_df.iloc[:100, :]
 
@@ -75,8 +75,8 @@ def draw_combined_matrix(real_df, pred_df, title):
     axs[0].set_title('Real Task Flow Data')
     axs[0].set_xlabel('Time Step')
     axs[0].set_ylabel('Area ID')
-    axs[0].set_xticks(np.arange(0, real_df.shape[0], 50))
-    axs[0].set_xticklabels(np.arange(0, real_df.shape[0], 50))
+    axs[0].set_xticks(np.arange(0, real_df.shape[0], 500))
+    axs[0].set_xticklabels(np.arange(0, real_df.shape[0], 500))
     axs[0].set_yticks(np.arange(0, real_df.shape[1]))
     axs[0].set_yticklabels(np.arange(0, real_df.shape[1]))
     axs[0].tick_params(axis='y', labelsize=7)
@@ -87,8 +87,8 @@ def draw_combined_matrix(real_df, pred_df, title):
     axs[1].set_title('Predicted Task Flow Data')
     axs[1].set_xlabel('Time Step')
     axs[0].set_ylabel('Area ID')
-    axs[1].set_xticks(np.arange(0, pred_df.shape[0], 50))
-    axs[1].set_xticklabels(np.arange(0, pred_df.shape[0], 50))
+    axs[1].set_xticks(np.arange(0, pred_df.shape[0], 500))
+    axs[1].set_xticklabels(np.arange(0, pred_df.shape[0], 500))
     axs[1].set_yticks(np.arange(0, pred_df.shape[1]))
     axs[1].set_yticklabels(np.arange(0, pred_df.shape[1]))
     axs[1].tick_params(axis='y', labelsize=7)  # no need to set yticks or yticklabels, shared with axs[0]

@@ -138,18 +138,9 @@ def generate_train_val_test(args):
             #         temp_dict[area][0] = 100
             #     else:
             #         temp_dict[area][0] = 10
-
+            # print(timestep)
             huawei_dict[timestep] = temp_dict
             temp_dict = {}
-
-    # 有任务就是1 无任务就是0
-    # for timestep in huawei_dict:
-    #     for area in huawei_dict[timestep]:
-    #         if huawei_dict[timestep][area][0] != 0:
-    #             huawei_dict[timestep][area][0] = 1
-    #         if huawei_dict[timestep][area][1] != 0:
-    #             huawei_dict[timestep][area][1] = 1
-    # print(huawei_dict)
 
     df = pd.DataFrame(huawei_dict).T
     df.index = pd.to_datetime(df.index)
@@ -165,7 +156,7 @@ def generate_train_val_test(args):
     print(x_offsets, y_offsets)
     # x: (num_samples, input_length, num_nodes, input_dim)
     # y: (num_samples, output_length, num_nodes, output_dim)
-    print(df.shape)
+    print('df.shape', df.shape)
     x, y = generate_graph_seq2seq_io_data(
         df,
         x_offsets=x_offsets,
@@ -221,3 +212,17 @@ if __name__ == "__main__":
     else:
         os.makedirs(args.output_dir)
     generate_train_val_test(args)
+
+    # huawei_data = json.load(open(args.traffic_df_filename, 'r', encoding='utf-8'))
+    # huawei_dict = {}
+    # for i in range(len(huawei_data)):
+    #     index = str(i)
+    #     timestep = list(huawei_data[index].keys())[0] # 从2024-01-01 00:00:00开始的时间戳，类型为str，间隔为1min
+
+    #     areas_data = huawei_data[index][timestep]
+    #     for area in areas_data['start']: # 一个时间段内的所有区域，共有20个区域，每个区域有start这个特征值
+    #         start_num, _ = areas_data['start'][area]
+    #         huawei_dict[timestep][area] = [start_num]
+
+    # df = pd.DataFrame(huawei_dict).T
+    # df.index = pd.to_datetime(df.index) # 将索引转换为时间戳

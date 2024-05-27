@@ -184,7 +184,7 @@ def main():
         interval = args.data[-2:]
     # torch.save(engine.model.state_dict(), 'pth_files/' + 'dichotomy_' + interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
     map_name = args.data[5:].split('-')[0]
-    torch.save(engine.model.state_dict(), 'pth_files/' + f'{map_name}_' +interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
+    torch.save(engine.model.state_dict(), 'pth_files/' + f'{map_name}_' + interval + "_best_"+str(round(his_loss[bestid],2))+".pth")
 
 
 if __name__ == "__main__":
