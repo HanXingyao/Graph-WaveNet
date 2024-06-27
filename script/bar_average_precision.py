@@ -11,9 +11,9 @@ result = {
     'BB': [83.81741667, 72.33076667, 56.21876667]
 }
 labels = list(result.keys())
-window_5 = [result[key][0] for key in labels]
+window_15 = [result[key][0] for key in labels]
 window_10 = [result[key][1] for key in labels]
-window_15 = [result[key][2] for key in labels]
+window_5 = [result[key][2] for key in labels]
 
 x = np.arange(len(labels))
 width = 0.6

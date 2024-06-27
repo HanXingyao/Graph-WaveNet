@@ -10,7 +10,7 @@ def convert_value(value):
     else:
         return 0
 
-df = pd.read_csv('csv_result/pure_sin_daily-wave.csv')
+df = pd.read_csv('csv_result/tg-wave.csv')
 columns = df.columns
 
 real_df = pd.DataFrame()
@@ -18,11 +18,11 @@ pred_df = pd.DataFrame()
 
 for column in columns:
     if 'real' in column:
-        # real_df[column] = df[column].apply(convert_value)
-        real_df[column] = df[column]
+        real_df[column] = df[column].apply(convert_value)
+        # real_df[column] = df[column]
     if 'pred' in column:
-        # pred_df[column] = df[column].apply(convert_value)
-        pred_df[column] = df[column]
+        pred_df[column] = df[column].apply(convert_value)
+        # pred_df[column] = df[column]
         
 # real_df = real_df.iloc[:100, :]
 
@@ -106,5 +106,5 @@ def draw_combined_matrix(real_df, pred_df, title):
 if __name__ == '__main__':
     # draw_matrix_2(real_df, 'Real Task Flow Data')
     # draw_matrix_2(pred_df, 'Predicted Task FlowData')
-    draw_combined_matrix(real_df, pred_df, '[JA]Real vs Predicted Task Flow Data')
+    draw_combined_matrix(real_df, pred_df, 'Real vs Predicted Task Flow Data')
 

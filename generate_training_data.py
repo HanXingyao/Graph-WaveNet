@@ -96,7 +96,7 @@ def generate_train_val_test(args):
     area_num = 20
     week_period = 24 * 60 * 7
     day_period = week_period / 7
-    k = 5 # k个规律数据 非周期叠加
+    k = 10 # k个规律数据 非周期叠加
 
     total_timestamps_num = week_period
     start_time = pd.Timestamp('2024-01-01 00:00:00')
@@ -125,9 +125,10 @@ def generate_train_val_test(args):
                                                                     minute_of_day / day_period + params['phase'])
 
             total_cycle = base_cycle + additional_cycles
-            data_value = total_cycle / k
+            data_value = abs(round(total_cycle/k))
+            # print(data_value)
             data_dict[timestep][str(area)] = data_value
-            
+
     df = pd.DataFrame(data_dict).T
     df.index = pd.to_datetime(df.index)
     
@@ -173,7 +174,7 @@ def generate_train_val_test(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_dir", type=str, default="data/5_pure_sin_daily-30", help="Output directory.")
+    parser.add_argument("--output_dir", type=str, default="data/intger-10sin-30", help="Output directory.")
     parser.add_argument("--traffic_df_filename", type=str, default="data/metr-la.h5", help="Raw traffic readings.",)
     parser.add_argument("--seq_length_x", type=int, default=12, help="Sequence Length.",)
     parser.add_argument("--seq_length_y", type=int, default=12, help="Sequence Length.",)

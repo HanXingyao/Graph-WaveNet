@@ -68,7 +68,8 @@ def generate_train_val_test(args):
         huawei_data = json.load(file)
     
     # ----------------------------------------------------------------------------
-    # 若一个区域在某一帧不是零，那么将其前5帧和后5帧的数据都设置为1(考虑两端不能越界的情况)
+    ''' 
+    # 若一个区域在某一帧不是零, 那么将其前5帧和后5帧的数据都设置为1(考虑两端不能越界的情况)
     temp_huawei_data = copy.deepcopy(huawei_data)
     # for i in range(int((1 - ratio) * len(huawei_data)), len(huawei_data)):
     for i in range(len(huawei_data)):
@@ -91,25 +92,38 @@ def generate_train_val_test(args):
                         # print("###########")
                         # huawei_data[i + j][timestep]['end'][area] = 1
     huawei_data = temp_huawei_data
+    '''
+    # 预处理: 任务流特征增强, 有任务的时间帧, 前5帧和后5帧的数据进行正态分布增强
+    window_size = 5 # 增强窗口半大小
+    std_dev = 10 # 标准差
+    temp_huawei_data = copy.deepcopy(huawei_data)
+
+    for i in range(int((1 - ratio) * len(huawei_data)), len(huawei_data)):
+        index = str(i)
+        timestep = list(huawei_data[index].keys())[0]
+        areas_data = huawei_data[index][timestep]
+
+        start_idx = max(0, i - window_size)
+        end_idx = min(len(huawei_data), i + window_size + 1)
+        time_steps = np.arange(start_idx, end_idx)
+
+        for area in areas_data['start']:
+            start_num, _ = areas_data['start'][area], areas_data['end'][area]
+            if start_num != 0:
+                normal_distribution = 2500 * np.exp(-((time_steps - i) ** 2) / (2 * std_dev ** 2)) / (np.sqrt(2 * np.pi) * std_dev) - 40
+                for j in range(start_idx, end_idx):
+                    if j < len(huawei_data):
+                        timestamp = list(huawei_data[str(j)].keys())[0]
+                        temp_huawei_data[str(j)][timestamp]['start'][area] = normal_distribution[j - start_idx]
+                        # print(normal_distribution[j - start_idx])
+
+    huawei_data = temp_huawei_data
+                
     # ----------------------------------------------------------------------------
     huawei_dict = {}
-    
-    # count = 0
-    # for i in range(len(huawei_data)):
-    #     index = str(i)
-    #     timestep = list(huawei_data[index].keys())[0]
-    #     areas_data = huawei_data[index][timestep]
-    #     # area = 'ZD-D4-C14'
-    #     area = 'ZD-D4-C16'
-    #     start_num = areas_data['start'][area]
-    #     if start_num != 0:
-    #         count += 1
-            # print(i, timestep, start_num)
-    # print(count)
 
-    # 开始迭代循环，temp_dict 用来存储每个时间段的数据
+    # temp_dict 用来存储每个时间段的数据
     temp_dict = {}
-    # for i, index in enumerate(huawei_data):
     for i in range(int((1 - ratio) * len(huawei_data)), len(huawei_data)):
         index = str(i)
         if i == 0:
@@ -127,23 +141,28 @@ def generate_train_val_test(args):
                 # temp_dict[area][1] += end_num
         if i % interval_length == 0:
             # 有无任务的映射
+            # for area in temp_dict:
+            #     if temp_dict[area][0] == 0:
+            #         temp_dict[area][0] = 8 + random.uniform(-8.0, 8.0)
+            #     else:
+            #         temp_dict[area][0] = 60 + random.uniform(-8.0, 8.0)
+
+            # 无任务的+8.5，有任务的不动
             for area in temp_dict:
                 if temp_dict[area][0] == 0:
-                    temp_dict[area][0] = 20 + random.uniform(-8.0, 8.0)
-                else:
-                    temp_dict[area][0] = 60 + random.uniform(-8.0, 8.0)
+                    temp_dict[area][0] = 7 + random.uniform(-7.0, 7.0)
+                # else:
+                #     temp_dict[area][0] += 20
+                # print(temp_dict[area][0])
 
-            # for area in temp_dict:
-            #     if temp_dict[area][0] != 0:
-            #         temp_dict[area][0] = 100
-            #     else:
-            #         temp_dict[area][0] = 10
-            # print(timestep)
             huawei_dict[timestep] = temp_dict
             temp_dict = {}
 
     df = pd.DataFrame(huawei_dict).T
     df.index = pd.to_datetime(df.index)
+    # df = df.applymap(lambda x: x[0] if isinstance(x, list) and len(x) == 1 else x)
+    # df.to_csv('tg.csv', index=False, header=False)
+    # exit()
     # print(df)
     # print(seq_length_x, seq_length_y)
 
@@ -193,9 +212,9 @@ def generate_train_val_test(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--interval", type=int, default=1, help="Interval Num.",)
-    parser.add_argument("--data_ratio", type=float, default=1, help="Data ratio backforwards, the number of days is 59.",)
-    parser.add_argument("--output_dir", type=str, default="data/bb-task", help="Output directory.",)
-    parser.add_argument("--traffic_df_filename", type=str, default="data/BB_result.json",
+    parser.add_argument("--data_ratio", type=float, default=0.125, help="Data ratio backforwards, the number of days is 59.",)
+    parser.add_argument("--output_dir", type=str, default="data/tg-task", help="Output directory.",)
+    parser.add_argument("--traffic_df_filename", type=str, default="data/TG_result.json",
                         help="Raw traffic readings.",)
     parser.add_argument("--seq_length_x", type=int, default=12, help="Sequence Length.",)
     parser.add_argument("--seq_length_y", type=int, default=12, help="Sequence Length.",)
